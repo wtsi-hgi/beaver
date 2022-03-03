@@ -1,0 +1,2 @@
+BEAVER_VERSION: str = "0.1"
+KIT_VERSION: str = "0.1"
