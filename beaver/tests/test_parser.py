@@ -23,8 +23,10 @@ import beaver
 
 
 class TestKitrgumentPasser(unittest.TestCase):
+    """testing the argument parser for kit"""
 
     def test_no_args_provided(self) -> None:
+        """testing not providing any args"""
 
         _ns = argparse.Namespace()
         _ns.version = False
@@ -36,6 +38,7 @@ class TestKitrgumentPasser(unittest.TestCase):
             beaver.parse_kit(_ns)
 
     def test_version_provided(self) -> None:
+        """testing provding -v flag"""
 
         _ns = argparse.Namespace()
         _ns.version = True
@@ -46,6 +49,8 @@ class TestKitrgumentPasser(unittest.TestCase):
         self.assertEqual(beaver.parse_kit(_ns), "version")
 
     def test_version_and_image_provided(self) -> None:
+        """testing providing -v and image"""
+
         _ns = argparse.Namespace()
         _ns.version = True
         _ns.group = None
@@ -55,6 +60,8 @@ class TestKitrgumentPasser(unittest.TestCase):
         self.assertEqual(beaver.parse_kit(_ns), "version")
 
     def test_image_provided(self) -> None:
+        """testing providing only image name"""
+
         _ns = argparse.Namespace()
         _ns.version = False
         _ns.group = None

@@ -26,6 +26,19 @@ _KIT_USAGE: str = "kit -v | -h | [-g GROUP] image-name [command …] "
 
 
 def parse_kit(args: argparse.Namespace) -> str:
+    """Parse the namespace of arguments to kit
+
+    Args:
+        args: argparse.Namespace - the CLI arguments
+            provided
+
+    Returns:
+        str: what action has been taken
+
+    Raises:
+        ValueError: if neither -v flag or an image
+            name provided
+    """
     if args.version:
         print(f"kit version: {beaver.version.KIT_VERSION}")
         return "version"
@@ -39,6 +52,8 @@ def parse_kit(args: argparse.Namespace) -> str:
 
 
 def kit_main() -> None:
+    """The main function for kit"""
+
     parser = argparse.ArgumentParser(
         description="kit command for running images")
     parser.add_argument("-v", "--version", action="store_true",
@@ -47,7 +62,10 @@ def kit_main() -> None:
     parser.add_argument("-g", "--group", help="group name")
     parser.add_argument("image", help="image to run", nargs="?")
     parser.add_argument(
-        "command", help="command to run in container (interactive environment if not provided)", nargs="*")
+        "command",
+        help="command to run in container (interactive environment if not provided)",
+        args="*"
+    )
 
     parser.usage = _KIT_USAGE
 
@@ -59,16 +77,22 @@ def kit_main() -> None:
 
 
 def beaver_web_main() -> None:
+    """The main function for the beaver web app"""
+
     print("Beaver Web")
     ...
 
 
 def beaver_build_main() -> None:
+    """The main function for the beaver builder"""
+
     print("Beaver Build")
     ...
 
 
 def beaver_main() -> None:
+    """The main beaver function, calling either the web app or builder"""
+
     parser = argparse.ArgumentParser(description="main beaver command")
     parser.add_argument("module", choices=[
                         "web", "build"], help="which module would you like to run")
@@ -79,4 +103,4 @@ def beaver_main() -> None:
         "build": beaver_build_main
     }
 
-    modules_to_funcs[args.module]
+    modules_to_funcs[args.module] # pylint: disable=pointless-statement
