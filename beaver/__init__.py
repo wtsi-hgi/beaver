@@ -4,6 +4,21 @@ from typing import Callable
 
 import beaver.version
 
+_KIT_USAGE: str = "kit -v | -h | [-g GROUP] image-name [command …] "
+
+
+def parse_kit(args: argparse.Namespace) -> str:
+    if args.version:
+        print(f"kit version: {beaver.version.KIT_VERSION}")
+        return "version"
+
+    if not args.image:
+        raise ValueError
+
+    print(args)
+    ...
+    return "run"
+
 
 def kit_main() -> None:
     parser = argparse.ArgumentParser(
@@ -11,26 +26,18 @@ def kit_main() -> None:
     parser.add_argument("-v", "--version", action="store_true",
                         help="view the verson of kit")
 
-    parser.add_argument("-g", "--group", nargs=1, help="group name")
+    parser.add_argument("-g", "--group", help="group name")
     parser.add_argument("image", help="image to run", nargs="?")
     parser.add_argument(
         "command", help="command to run in container (interactive environment if not provided)", nargs="*")
 
-    parser.usage = "kit -v | -h | [-g GROUP] image-name [command …] "
+    parser.usage = _KIT_USAGE
 
-    args: argparse.Namespace = parser.parse_args()
-
-    if args.version:
-        print(f"kit version: {beaver.version.KIT_VERSION}")
-        sys.exit(0)
-
-    if not args.image:
+    try:
+        parse_kit(parser.parse_args())
+    except ValueError:
         print(parser.usage)
         sys.exit(1)
-
-    print(args)
-
-    ...
 
 
 def beaver_web_main() -> None:
