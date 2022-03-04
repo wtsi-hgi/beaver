@@ -1,6 +1,6 @@
 # Beaver Design Document
 
-With special thanks to Christoper Harrison for their original design ideas [on Confluence](https://confluence.sanger.ac.uk/display/HGI/3.+Design).
+With special thanks to Christopher Harrison for their original design ideas [on Confluence](https://confluence.sanger.ac.uk/display/HGI/3.+Design).
 
 ## Development Criteria
 
