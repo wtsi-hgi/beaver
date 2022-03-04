@@ -20,6 +20,8 @@ import argparse
 import sys
 from typing import Callable
 
+import uvicorn
+
 import beaver.version
 
 _KIT_USAGE: str = "kit -v | -h | [-g GROUP] image-name [command …] "
@@ -76,14 +78,19 @@ def kit_main() -> None:
         sys.exit(1)
 
 
-def beaver_web_main() -> None:
+def beaver_web_main(debug: bool = False) -> None:
     """The main function for the beaver web app"""
 
-    print("Beaver Web")
-    ...
+    uvicorn.run(
+        "beaver.http:app",
+        host="0.0.0.0",
+        port=4557,
+        reload=debug,
+        debug=debug
+    )
 
 
-def beaver_build_main() -> None:
+def beaver_build_main(_: bool = False) -> None:
     """The main function for the beaver builder"""
 
     print("Beaver Build")
@@ -94,13 +101,15 @@ def beaver_main() -> None:
     """The main beaver function, calling either the web app or builder"""
 
     parser = argparse.ArgumentParser(description="main beaver command")
+    parser.add_argument("--debug", "-debug",
+                        help="run in debug mode", action="store_true")
     parser.add_argument("module", choices=[
                         "web", "build"], help="which module would you like to run")
     args: argparse.Namespace = parser.parse_args()
 
-    modules_to_funcs: dict[str, Callable[[], None]] = {
+    modules_to_funcs: dict[str, Callable[[bool], None]] = {
         "web": beaver_web_main,
         "build": beaver_build_main
     }
 
-    modules_to_funcs[args.module] # pylint: disable=pointless-statement
+    modules_to_funcs[args.module](args.debug)
