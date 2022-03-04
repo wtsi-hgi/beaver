@@ -16,22 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import List
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-from beaver.db.db import get_db
-import beaver.db.images
-from beaver.models.images import Image
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 
-router = APIRouter(prefix="/images", tags=["images"])
+class GroupBase(BaseModel):
+    """base representation of a Group"""
+    group_name: str
 
 
-@router.get("/{user_id}", response_model=List[Image])
-async def get_images_for_user(
-    user_id: int,
-    database: Session = Depends(get_db)
-) -> List[beaver.db.images.Image]:
-    """returns images available for the specific user"""
-    return beaver.db.images.get_images_for_user(database, user_id)
+class Group(GroupBase):
+    """full representation of a Group"""
+    group_id: int
+
+    class Config:
+        """orm config"""
+        orm_mode = True

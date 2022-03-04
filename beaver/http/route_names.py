@@ -42,4 +42,5 @@ async def new_name(item: ImageNameElements, database: Session = Depends(get_db))
 @router.patch("/")
 async def update_names():
     """updates the lists of possible image name elements"""
+    # TODO
     return None

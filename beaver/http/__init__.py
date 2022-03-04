@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from fastapi import FastAPI
 
 from beaver.http.route_names import router as names_router
+from beaver.http.route_images import router as images_router
 
 app = FastAPI()
 
@@ -31,3 +32,4 @@ async def root():
     }
 
 app.include_router(names_router)
+app.include_router(images_router)
