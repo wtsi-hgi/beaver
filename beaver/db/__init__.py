@@ -16,18 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from fastapi import FastAPI
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
-from beaver.http.route_names import router as names_router
-
-app = FastAPI()
-
-
-@app.get("/")
-async def root():
-    """test endpoint"""
-    return {
-        "message": "Hello World"
-    }
-
-app.include_router(names_router)
+MetaBase = DeclarativeMeta

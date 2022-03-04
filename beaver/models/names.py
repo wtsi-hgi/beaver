@@ -16,12 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from . import app
+from typing import List
+
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 
-@app.get("/")
-async def root():
-    """test endpoint"""
-    return {
-        "message": "Hello World"
-    }
+class ImageNameElements(BaseModel):
+    """representing requests and responses for image name data"""
+    adjectives: List[str]
+    names: List[str]

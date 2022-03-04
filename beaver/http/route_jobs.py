@@ -15,19 +15,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
-from fastapi import FastAPI
-
-from beaver.http.route_names import router as names_router
-
-app = FastAPI()
-
-
-@app.get("/")
-async def root():
-    """test endpoint"""
-    return {
-        "message": "Hello World"
-    }
-
-app.include_router(names_router)
