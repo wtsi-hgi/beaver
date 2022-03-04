@@ -18,38 +18,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from typing import List
-
-from sqlalchemy import Column, ForeignKey, String, Integer
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy import Column, ForeignKey, Integer, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm.relationships import RelationshipProperty
 
 from beaver.db.db import Base
 from beaver.db.groups import Group
+from beaver.db.images import Image
 from beaver.db.users import User
 
 
-class Image(Base):
-    """class models a built image"""
+class ImageUsage(Base):
+    """models image usage information"""
 
-    __tablename__ = "images"
-    image_id = Column(Integer, primary_key=True)
-    image_name = Column(String)
+    __tablename__ = "image_usage"
+    _dummy = Column(Integer, primary_key=True)
+    image_id = Column(Integer, ForeignKey("images.image_id"))
     user_id = Column(Integer, ForeignKey("users.user_id"))
     group_id = Column(Integer, ForeignKey("groups.group_id"))
+    datetime = Column(DateTime)
 
     user: RelationshipProperty[User] = relationship("User")
     group: RelationshipProperty[Group] = relationship("Group")
-
-
-class ImageContents(Base):
-    """shows the contents of images"""
-
-    __tablename__ = "image_contents"
-    image_id = Column(Integer, ForeignKey("images.image_id"))
-    package_id = Column(Integer, ForeignKey("packages.package_id"))
-
-
-def get_images_for_user(database: Session, user_id: int) -> List[Image]:
-    """gets images available for the specific user"""
-    return database.query(Image).filter(Image.user_id == user_id).all()  # type: ignore
+    image: RelationshipProperty[Image] = relationship("Image")

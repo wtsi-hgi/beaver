@@ -194,12 +194,12 @@ The database will be a MySQL database. Only the web API will interact with it, a
 | package_id | int  | FK `packages.package_id` NOT NULL |
 
 `github_packages`:
-| Column          | Type    | Constraints |
-|-----------------|---------|-------------|
-| package_id      | int     | PK NOT NULL |
-| github_user     | varchar | NOT NULL    |
-| repository_name | varchar | NOT NULL    |
-| commit_hash     | varchar |             |
+| Column          | Type    | Constraints                       |
+|-----------------|---------|-----------------------------------|
+| package_id      | int     | FK `packages.package_id` NOT NULL |
+| github_user     | varchar | NOT NULL                          |
+| repository_name | varchar | NOT NULL                          |
+| commit_hash     | varchar |                                   |
 
 `package_dependencies`:
 | Column        | Type | Constraints                       |
