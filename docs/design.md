@@ -119,7 +119,9 @@ This will be provided by a web server using the `FastAPI` package. All of these 
 | `/packages/{package}`               | PATCH  | *    | Update a package’s information                                        |
 | `/images/{user}`                    | GET    |      | Returns the images made by that user and their groups                 |
 | `/images/usage/byuser/{user}`       | GET    | *    | Get image usage for the user                                          |
-| `/images/usage/bygroup/{group}`     | GET    | *    | Get image usage by package                                            |
+| `/images/usage/bygroup/{group}`     | GET    | *    | Get image usage for the group                                         |
+| `/images/usage/byimage/{image}`     | GET    | *    | Get image usage for the image                                         |
+| `/images/usage/bypackage/{package}` | GET    | *    | Get image usage by package                                        |
 | `/images/usage`                     | POST   | **   | Log that an image has been used                                       |
 | `/build`                            | POST   |      | Sets a build job running with a JSON body describing the build. Returns a job id   |
 | `/jobs`                             | GET    |      | Return general information about current builds, such as a count of current builds |

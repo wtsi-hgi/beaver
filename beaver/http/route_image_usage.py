@@ -15,3 +15,50 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
+from typing import List
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from beaver.db.db import get_db
+import beaver.db.image_usage
+
+router = APIRouter(prefix="/images/usage", tags=["image_usage"])
+
+# TODO: response_models
+
+
+@router.get("/byuser/{user}")
+async def get_image_usage_by_user(
+    user: int,
+    database: Session = Depends(get_db)
+) -> List[beaver.db.image_usage.ImageUsage]:
+    """returns image usage by the user specified"""
+    return beaver.db.image_usage.get_image_usage_for_user(database, user)
+
+
+@router.get("/bygroup/{group}")
+async def get_image_usage_by_group(
+    group: int,
+    database: Session = Depends(get_db)
+) -> List[beaver.db.image_usage.ImageUsage]:
+    """returns image usage by the group specified"""
+    return beaver.db.image_usage.get_image_usage_for_group(database, group)
+
+
+@router.get("/byimage/{image}")
+async def get_image_usage_by_image(
+    image: int,
+    database: Session = Depends(get_db)
+) -> List[beaver.db.image_usage.ImageUsage]:
+    """returns image usage by the image specified"""
+    return beaver.db.image_usage.get_image_usage_by_image(database, image)
+
+
+@router.get("/bypackage/{package}")
+async def get_image_usage_by_package(
+    package: int,
+    database: Session = Depends(get_db)
+) -> List[beaver.db.image_usage.ImageUsage]:
+    """returns image usage by the package specified"""
+    return beaver.db.image_usage.get_image_usage_by_package(database, package)
