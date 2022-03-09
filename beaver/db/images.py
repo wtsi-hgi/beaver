@@ -34,9 +34,9 @@ class Image(Base):
 
     __tablename__ = "images"
     image_id = Column(Integer, primary_key=True)
-    image_name = Column(String)
-    user_id = Column(Integer, ForeignKey("users.user_id"))
-    group_id = Column(Integer, ForeignKey("groups.group_id"))
+    image_name = Column(String, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.group_id"), nullable=False)
 
     user: RelationshipProperty[User] = relationship("User")
     group: RelationshipProperty[Group] = relationship("Group")
@@ -47,8 +47,9 @@ class ImageContents(Base):
 
     __tablename__ = "image_contents"
     image_contents_id = Column(Integer, primary_key=True)
-    image_id = Column(Integer, ForeignKey("images.image_id"))
-    package_id = Column(Integer, ForeignKey("packages.package_id"))
+    image_id = Column(Integer, ForeignKey("images.image_id"), nullable=False)
+    package_id = Column(Integer, ForeignKey(
+        "packages.package_id"), nullable=False)
 
 
 def get_images_for_user(database: Session, user_id: int) -> List[Image]:

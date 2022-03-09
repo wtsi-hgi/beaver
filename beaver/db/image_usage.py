@@ -35,10 +35,10 @@ class ImageUsage(Base):
 
     __tablename__ = "image_usage"
     image_usage_id = Column(Integer, primary_key=True)
-    image_id = Column(Integer, ForeignKey("images.image_id"))
-    user_id = Column(Integer, ForeignKey("users.user_id"))
-    group_id = Column(Integer, ForeignKey("groups.group_id"))
-    datetime = Column(DateTime)
+    image_id = Column(Integer, ForeignKey("images.image_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.group_id"), nullable=False)
+    datetime = Column(DateTime, nullable=False)
 
     user: RelationshipProperty[User] = relationship("User")
     group: RelationshipProperty[Group] = relationship("Group")
