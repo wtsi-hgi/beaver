@@ -16,22 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from fastapi import FastAPI
+import datetime
 
-from beaver.http.route_names import router as names_router
-from beaver.http.route_images import router as images_router
-from beaver.http.route_image_usage import router as image_usage_router
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
-app = FastAPI()
+from beaver.models.groups import Group
+from beaver.models.users import User
+from beaver.models.images import Image
 
 
-@app.get("/")
-async def root():
-    """test endpoint"""
-    return {
-        "message": "Hello World"
-    }
+class ImageUsageBase(BaseModel):
+    """base representation of an image usage dataset"""
+    image_id: int
+    user_id: int
+    group_id: int
 
-app.include_router(names_router)
-app.include_router(images_router)
-app.include_router(image_usage_router)
+
+class ImageUsage(ImageUsageBase):
+    """full representation of an image usage dataset"""
+    image: Image
+    user: User
+    group: Group
+    datetime: datetime.datetime
+
+    class Config:
+        """orm config"""
+        orm_mode = True
