@@ -16,9 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from datetime import datetime
 import enum
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
+
+from beaver.models.images import Image
 
 
 class JobInfo(BaseModel):
@@ -34,9 +37,29 @@ class JobInfo(BaseModel):
 class JobStatus(enum.Enum):
     """statuses a job can be in"""
 
-    Queued = enum.auto()  # pylint: disable=invalid-name
-    BuildingDefinition = enum.auto()  # pylint: disable=invalid-name
-    DefinitionMade = enum.auto()  # pylint: disable=invalid-name
-    BuildingImage = enum.auto()  # pylint: disable=invalid-name
-    Succeeded = enum.auto()  # pylint: disable=invalid-name
-    Failed = enum.auto()  # pylint: disable=invalid-name
+    Queued = "Queued"  # pylint: disable=invalid-name
+    BuildingDefinition = "BuildingDefinition"  # pylint: disable=invalid-name
+    DefinitionMade = "DefinitionMade"  # pylint: disable=invalid-name
+    BuildingImage = "BuildingImage"  # pylint: disable=invalid-name
+    Succeeded = "Succeeded"  # pylint: disable=invalid-name
+    Failed = "Failed"  # pylint: disable=invalid-name
+
+
+class JobBase(BaseModel):
+    """models the basic information of a job required at job creation"""
+    job_id: str
+    image_id: int
+
+
+class Job(JobBase):
+    """models a job"""
+    status: JobStatus
+    detail: str | None
+    starttime: datetime | None
+    endtime: datetime | None
+
+    image: Image
+
+    class Config:
+        """orm config"""
+        orm_mode = True

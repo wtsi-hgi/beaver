@@ -35,9 +35,9 @@ class GitHubPackage(BaseModel):
 
 class PackageType(enum.Enum):
     """types of package"""
-    std = enum.auto()  # standard/custom made nix derivations pylint: disable=invalid-name
-    R = enum.auto()  # R packages
-    py = enum.auto()  # python packages pylint: disable=invalid-name
+    std = "std"  # standard/custom made nix derivations pylint: disable=invalid-name
+    R = "R"  # R packages
+    py = "py"  # python packages pylint: disable=invalid-name
 
 
 class PackageBase(BaseModel):

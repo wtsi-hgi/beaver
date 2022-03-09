@@ -20,8 +20,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from beaver.db.db import get_db
+import beaver.db.jobs
 from beaver.db.jobs import get_num_jobs_in_status, get_num_jobs_in_status_last_n_hours
-from beaver.models.jobs import JobInfo, JobStatus
+from beaver.models.jobs import JobInfo, JobStatus, Job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -43,3 +44,9 @@ async def get_basic_job_info(database: Session = Depends(get_db)) -> JobInfo:
         jobs_failed_last_24_hours=get_num_jobs_in_status_last_n_hours(
             JobStatus.Failed, database)
     )
+
+
+@router.get("/{job_id}", response_model=Job)
+async def get_job(job_id: str, database: Session = Depends(get_db)) -> beaver.db.jobs.Job:
+    """return the job identified by `job_id`"""
+    return beaver.db.jobs.get_job(database, job_id)

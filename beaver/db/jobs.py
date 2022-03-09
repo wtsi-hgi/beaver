@@ -72,3 +72,14 @@ def get_num_jobs_in_status_last_n_hours(
         Job.status == status.value).filter(
             Job.endtime > datetime.now() - timedelta(hours=hours)  # type: ignore
     ).count()
+
+
+def get_job(database: Session, job_id: str) -> Job:
+    """return a particular job, identified by `job_id`
+
+    Args:
+        job_id: str - the ID of the job
+            (note this is a string as it is a UUID)
+
+    """
+    return database.query(Job).filter(Job.job_id == job_id).one()  # type: ignore
