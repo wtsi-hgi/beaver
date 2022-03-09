@@ -21,6 +21,7 @@ from fastapi import FastAPI
 from beaver.http.route_names import router as names_router
 from beaver.http.route_images import router as images_router
 from beaver.http.route_image_usage import router as image_usage_router
+from beaver.http.route_packages import router as package_router
 
 app = FastAPI()
 
@@ -35,3 +36,4 @@ async def root():
 app.include_router(names_router)
 app.include_router(images_router)
 app.include_router(image_usage_router)
+app.include_router(package_router)

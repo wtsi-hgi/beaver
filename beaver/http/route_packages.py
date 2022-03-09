@@ -15,3 +15,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
+from typing import List
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from beaver.db.db import get_db
+import beaver.db.packages
+from beaver.models.packages import Package
+
+router = APIRouter(prefix="/packages", tags=["packages"])
+
+
+@router.get("/", response_model=List[Package])
+async def get_all_packages(database: Session = Depends(get_db)) -> List[beaver.db.packages.Package]:
+    """returns all available packages"""
+    return beaver.db.packages.get_all_pacakges(database)

@@ -18,19 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-import enum
+from typing import List
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 from sqlalchemy.orm.relationships import RelationshipProperty
 
 from beaver.db.db import Base
-
-
-class PackageType(enum.Enum):
-    """types of package"""
-    std = enum.auto()  # standard/custom made nix derivations pylint: disable=invalid-name
-    R = enum.auto()  # R packages
-    py = enum.auto()  # python packages pylint: disable=invalid-name
+from beaver.models.packages import PackageType
 
 
 class Package(Base):
@@ -44,6 +38,9 @@ class Package(Base):
     package_type = Column(Enum(PackageType))
     github_filename = Column(String)
 
+    github_package: RelationshipProperty[GitHubPackage] = relationship(
+        "GitHubPackage", back_populates="package", uselist=False)
+
 
 class GitHubPackage(Base):
     """represents a package being pulled from GitHub"""
@@ -56,7 +53,7 @@ class GitHubPackage(Base):
     commit_hash = Column(String)
 
     package: RelationshipProperty[Package] = relationship(
-        "Package", back_populates="github_package")
+        "Package", back_populates="github_package", foreign_keys=[package_id])
 
 
 class PackageDependency(Base):
@@ -67,5 +64,12 @@ class PackageDependency(Base):
     package_id = Column(Integer, ForeignKey("packages.package_id"))
     dependency_id = Column(Integer, ForeignKey("packages.package_id"))
 
-    package: RelationshipProperty[Package] = relationship("Package")
-    dependency: RelationshipProperty[Package] = relationship("Package")
+    package: RelationshipProperty[Package] = relationship(
+        "Package", foreign_keys=[package_id])
+    dependency: RelationshipProperty[Package] = relationship(
+        "Package", foreign_keys=[dependency_id])
+
+
+def get_all_pacakges(database: Session) -> List[Package]:
+    """gets all pacakges available"""
+    return database.query(Package).all()  # type: ignore
