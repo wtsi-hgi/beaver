@@ -24,6 +24,7 @@ import os
 from fastapi.testclient import TestClient
 from beaver.db.image_usage import ImageUsage
 from beaver.db.images import Image, ImageContents
+from beaver.db.names import ImageNameAdjective, ImageNameName
 
 from beaver.db.packages import GitHubPackage, Package
 from beaver.db.groups import Group
@@ -117,6 +118,18 @@ class TestAPIGetEndpoints(unittest.TestCase):
             package_id=1
         )
 
+        # Add a few possible image name sections
+        for i in range(5):
+            _adjective = ImageNameAdjective(
+                adjective=f"adj{i}"
+            )
+            database.add(_adjective)
+
+            _name = ImageNameName(
+                name=f"name{i}"
+            )
+            database.add(_name)
+
         database.add(_image_contents)
 
         database.commit()
@@ -165,6 +178,10 @@ class TestAPIGetEndpoints(unittest.TestCase):
         _gh = _package_c["github_package"]
         assert _gh["github_user"] == "testGHUser"
         assert _gh["repository_name"] == "testRepoName"
+
+    # def test_get_images_for_user(self):
+    #     # TODO
+    #     ...
 
     def test_image_usage_by_user(self):
         """test collecting image usage information
@@ -246,6 +263,51 @@ class TestAPIGetEndpoints(unittest.TestCase):
         assert len(data) == 1
         assert data[0]["image_id"] == 1
         assert data[0]["datetime"] == self.image_usage_time.isoformat()
+
+    # def test_get_job_information(self):
+    #     # TODO
+    #     ...
+
+    # def test_get_job(self):
+    #     # TODO
+    #     ...
+
+    def test_get_image_names(self):
+        """test getting possible image name parts
+
+        Expects:
+            {
+                "adjectives": [
+                    "adj0",
+                    "adj1",
+                    "adj2",
+                    "adj3",
+                    "adj4"
+                ],
+                "names": [
+                    "name0",
+                    "name1",
+                    "name2",
+                    "name3",
+                    "name4"
+                ]
+            }
+
+        Note: although these are arrays, we don't care
+            about the order
+        """
+
+        response = self.client.get("/names")
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "adjectives" in data
+        assert "names" in data
+
+        assert set(data["adjectives"]) == {
+            "adj0", "adj1", "adj2", "adj3", "adj4"}
+        assert set(data["names"]) == {
+            "name0", "name1", "name2", "name3", "name4"}
 
     def tearDown(self) -> None:
         os.remove("_tmp_db.db")
