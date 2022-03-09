@@ -46,6 +46,7 @@ class ImageContents(Base):
     """shows the contents of images"""
 
     __tablename__ = "image_contents"
+    image_contents_id = Column(Integer, primary_key=True)
     image_id = Column(Integer, ForeignKey("images.image_id"))
     package_id = Column(Integer, ForeignKey("packages.package_id"))
 

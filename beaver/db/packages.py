@@ -49,7 +49,7 @@ class GitHubPackage(Base):
     """represents a package being pulled from GitHub"""
 
     __tablename__ = "github_packages"
-    _dummy = Column(Integer, primary_key=True)
+    github_package_id = Column(Integer, primary_key=True)
     package_id = Column(Integer, ForeignKey("packages.package_id"))
     github_user = Column(String)
     repository_name = Column(String)
@@ -63,7 +63,7 @@ class PackageDependency(Base):
     """links to packages as a dependency"""
 
     __tablename__ = "package_dependencies"
-    _dummy = Column(Integer, primary_key=True)
+    package_dependency_id = Column(Integer, primary_key=True)
     package_id = Column(Integer, ForeignKey("packages.package_id"))
     dependency_id = Column(Integer, ForeignKey("packages.package_id"))
 

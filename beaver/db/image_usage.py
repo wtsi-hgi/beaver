@@ -34,7 +34,7 @@ class ImageUsage(Base):
     """models image usage information"""
 
     __tablename__ = "image_usage"
-    _dummy = Column(Integer, primary_key=True)
+    image_usage_id = Column(Integer, primary_key=True)
     image_id = Column(Integer, ForeignKey("images.image_id"))
     user_id = Column(Integer, ForeignKey("users.user_id"))
     group_id = Column(Integer, ForeignKey("groups.group_id"))
