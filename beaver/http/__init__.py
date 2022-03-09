@@ -23,7 +23,10 @@ from beaver.http.route_images import router as images_router
 from beaver.http.route_image_usage import router as image_usage_router
 from beaver.http.route_packages import router as package_router
 from beaver.http.route_jobs import router as jobs_router
+import beaver.db.db
 
+beaver.db.db.create_connectors(
+    "mysql+mysqlconnector://beaver:beaverPass@localhost/beaver")
 app = FastAPI()
 
 

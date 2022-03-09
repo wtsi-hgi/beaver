@@ -24,5 +24,5 @@ from beaver.db.db import Base
 class Group(Base):
     """class representing a group"""
     __tablename__ = "groups"
-    group_id = Column(Integer, primary_key=True)
-    group_name = Column(String, primary_key=True)
+    group_id = Column(Integer, primary_key=True, autoincrement=True)
+    group_name = Column(String)

@@ -53,4 +53,6 @@ class ImageContents(Base):
 
 def get_images_for_user(database: Session, user_id: int) -> List[Image]:
     """gets images available for the specific user"""
-    return database.query(Image).filter(Image.user_id == user_id).all()  # type: ignore
+    # TODO: images by group too
+    return database.query(Image).filter(  # type: ignore
+        Image.user_id == user_id).all()  # type: ignore

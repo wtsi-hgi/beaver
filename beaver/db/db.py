@@ -24,16 +24,27 @@ from sqlalchemy.orm import sessionmaker
 
 from . import MetaBase
 
-DATABASE_URL: str = "mysql+mysqlconnector://beaver:beaverPass@localhost/beaver"
+engine = ...  # pylint: disable=invalid-name
+session = lambda: sessionmaker()  # pylint: disable=unnecessary-lambda
 
-engine = create_engine(DATABASE_URL)
-session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def create_connectors(database_url: str):
+    """update the engine and session variables
+    using `database_url`
+    """
+
+    global engine, session  # pylint: disable=global-statement, invalid-name
+    engine = create_engine(database_url, connect_args={
+                           "check_same_thread": False})
+    session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
 Base: Type[MetaBase] = declarative_base()
 
 
 def create_db() -> None:
     """create the databse tables if needed"""
-    Base.create_all(bind=engine)  # type: ignore
+    Base.metadata.create_all(bind=engine)  # type: ignore
 
 
 def get_db() -> Generator[sessionmaker, None, None]:

@@ -24,5 +24,5 @@ from beaver.db.db import Base
 class User(Base):
     """class representing a user"""
     __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True)
-    user_name = Column(String, primary_key=True)
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_name = Column(String)

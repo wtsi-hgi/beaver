@@ -31,11 +31,12 @@ class Package(Base):
     """represents a single package/derivation"""
 
     __tablename__ = "packages"
-    package_id = Column(Integer, primary_key=True)
-    package_name = Column(String)
+    package_id = Column(Integer, primary_key=True, autoincrement=True)
+    package_name = Column(String, nullable=False)
     package_version = Column(String)
-    commonly_used = Column(Boolean)
-    package_type = Column(Enum(PackageType))
+    commonly_used = Column(Boolean, nullable=False, default=False)
+    package_type = Column(
+        Enum(PackageType), nullable=False, default=PackageType.std)
     github_filename = Column(String)
 
     github_package: RelationshipProperty[GitHubPackage] = relationship(
@@ -46,7 +47,7 @@ class GitHubPackage(Base):
     """represents a package being pulled from GitHub"""
 
     __tablename__ = "github_packages"
-    github_package_id = Column(Integer, primary_key=True)
+    github_package_id = Column(Integer, primary_key=True, autoincrement=True)
     package_id = Column(Integer, ForeignKey("packages.package_id"))
     github_user = Column(String)
     repository_name = Column(String)
