@@ -15,3 +15,31 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from beaver.db.db import get_db
+from beaver.db.jobs import get_num_jobs_in_status, get_num_jobs_in_status_last_n_hours
+from beaver.models.jobs import JobInfo, JobStatus
+
+router = APIRouter(prefix="/jobs", tags=["jobs"])
+
+
+@router.get("/", response_model=JobInfo)
+async def get_basic_job_info(database: Session = Depends(get_db)) -> JobInfo:
+    """return some info about number of jobs in various states"""
+    return JobInfo(
+        jobs_queued=get_num_jobs_in_status(
+            JobStatus.Queued, database),
+        jobs_building_definition=get_num_jobs_in_status(
+            JobStatus.BuildingDefinition, database),
+        jobs_pending_image_build=get_num_jobs_in_status(
+            JobStatus.DefinitionMade, database),
+        jobs_building_image=get_num_jobs_in_status(
+            JobStatus.BuildingImage, database),
+        jobs_completed_last_24_hours=get_num_jobs_in_status_last_n_hours(
+            JobStatus.Succeeded, database),
+        jobs_failed_last_24_hours=get_num_jobs_in_status_last_n_hours(
+            JobStatus.Failed, database)
+    )
