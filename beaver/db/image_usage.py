@@ -62,5 +62,9 @@ def get_image_usage_by_image(database: Session, image: int) -> List[ImageUsage]:
 
 def get_image_usage_by_package(database: Session, package: int) -> List[ImageUsage]:
     """get image usage based on a particular package"""
+    images_for_package = database.query(ImageContents).filter( # type: ignore
+        ImageContents.package_id == package # type: ignore
+    ).with_entities(ImageContents.image_id).subquery()
+
     return database.query(ImageUsage).filter(  # type: ignore
-        ImageContents.package_id == package).all()  # type: ignore
+        ImageUsage.image_id.in_(images_for_package)).all()  # type: ignore
