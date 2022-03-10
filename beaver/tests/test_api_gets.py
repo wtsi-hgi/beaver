@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from datetime import datetime
 import unittest
-import sqlite3
 import os
 
 from fastapi.testclient import TestClient
@@ -35,24 +34,17 @@ from beaver.db.users import User
 import beaver.db.db
 import beaver.http
 from beaver.models.jobs import JobStatus
+from . import set_up_database
 
 
 class TestAPIGetEndpoints(unittest.TestCase):
     """testing all API get endpoints with fake SQLite DB"""
 
     def setUp(self) -> None:
-        try:
-            os.remove("_tmp_db.db")
-        except FileNotFoundError:
-            pass
-
-        sqlite3.connect("_tmp_db.db")
+        set_up_database()
 
         self.app = beaver.http.app
         self.client = TestClient(self.app)
-
-        beaver.db.db.create_connectors("sqlite:///./_tmp_db.db")
-        beaver.db.db.create_db()
 
         # Now Add a Load of Testing Data to Extract
         database = next(beaver.db.db.get_db())
