@@ -24,11 +24,9 @@ from sqlalchemy.orm import Session
 
 from beaver.db.db import get_db
 import beaver.db.image_usage
-from beaver.models.image_usage import ImageUsage
+from beaver.models.image_usage import ImageUsage, ImageUsageBase
 
 router = APIRouter(prefix="/images/usage", tags=["image_usage"])
-
-# TODO: response_models
 
 
 @router.get("/byuser/{user}", response_model=List[ImageUsage])
@@ -65,3 +63,12 @@ async def get_image_usage_by_package(
 ) -> List[beaver.db.image_usage.ImageUsage]:
     """returns image usage by the package specified"""
     return beaver.db.image_usage.get_image_usage_by_package(database, package)
+
+
+@router.post("/", response_model=ImageUsage)
+async def record_image_usage(
+    image_usage: ImageUsageBase,
+    database: Session = Depends(get_db)
+) -> beaver.db.image_usage.ImageUsage:
+    """records that an image has been used"""
+    return beaver.db.image_usage.record_image_usage(database, image_usage)

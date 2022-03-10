@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import Column, ForeignKey, Integer, DateTime
@@ -30,6 +31,7 @@ from beaver.db.db import Base
 from beaver.db.groups import Group
 from beaver.db.images import Image, ImageContents
 from beaver.db.users import User
+from beaver.models.image_usage import ImageUsageBase
 
 
 class ImageUsage(Base):
@@ -40,7 +42,7 @@ class ImageUsage(Base):
     image_id = Column(Integer, ForeignKey("images.image_id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     group_id = Column(Integer, ForeignKey("groups.group_id"), nullable=False)
-    datetime = Column(DateTime, nullable=False)
+    datetime = Column(DateTime, nullable=False, default=datetime.now())
 
     user: RelationshipProperty[User] = relationship("User")
     group: RelationshipProperty[Group] = relationship("Group")
@@ -70,3 +72,14 @@ def get_image_usage_by_package(database: Session, package: int) -> List[ImageUsa
 
     return database.query(ImageUsage).filter(  # type: ignore
         ImageUsage.image_id.in_(images_for_package)).all()  # type: ignore
+
+
+def record_image_usage(database: Session, image_usage: ImageUsageBase) -> ImageUsage:
+    """record usage of an image in the database"""
+
+    db_image_usage = ImageUsage(**image_usage.dict())
+    database.add(db_image_usage)
+    database.commit()
+    database.refresh(db_image_usage)
+
+    return db_image_usage

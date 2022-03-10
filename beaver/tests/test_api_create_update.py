@@ -18,14 +18,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from datetime import datetime, timedelta
 import os
 import unittest
 
 from fastapi.testclient import TestClient
 
 import beaver.db.db
+from beaver.db.groups import Group
+from beaver.db.images import Image
+from beaver.db.image_usage import ImageUsage
 from beaver.db.names import ImageNameAdjective, ImageNameName
 from beaver.db.packages import GitHubPackage, Package
+from beaver.db.users import User
 import beaver.http
 from . import set_up_database
 
@@ -39,8 +44,26 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         set_up_database()
 
-        self.app = beaver.http.app
-        self.client = TestClient(self.app)
+        self.client = TestClient(beaver.http.app)
+
+        database = next(beaver.db.db.get_db())
+
+        _new_user = User(user_name="testUser0")
+        database.add(_new_user)
+
+        _new_group = Group(group_name="testGroup0")
+        database.add(_new_group)
+
+        database.commit()
+
+        _new_image = Image(
+            image_name="testImage",
+            user_id=1,
+            group_id=1
+        )
+
+        database.add(_new_image)
+        database.commit()
 
     def test_create_package_not_github_linked(self):
         """test createing a new package, not linked to
@@ -179,6 +202,40 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         db_names = [x.name for x in database.query(ImageNameName).all()]
         assert all(x in db_names for x in new_adjectives["names"])
+
+    def test_add_image_usage(self):
+        """test adding usage information for an image
+
+        - we expect the usage information returned to be
+            the same as what we provided
+        - we expect the usage information we provided to
+            be in the database
+        """
+
+        new_image_usage = {
+            "image_id": 1,
+            "user_id": 1,
+            "group_id": 1
+        }
+
+        response = self.client.post("/images/usage/", json=new_image_usage)
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(data["group_id"], new_image_usage["group_id"])
+        self.assertEqual(data["user_id"], new_image_usage["user_id"])
+        self.assertEqual(data["group_id"], new_image_usage["group_id"])
+
+        database = next(beaver.db.db.get_db())
+        db_image_usage = database.query(ImageUsage).one().__dict__
+        self.assertTrue(datetime.now() - timedelta(0, 10)
+                        < db_image_usage["datetime"])
+
+        del db_image_usage["datetime"]
+        del db_image_usage["image_usage_id"]
+        del db_image_usage["_sa_instance_state"]
+
+        self.assertEqual(db_image_usage, new_image_usage)
 
     def tearDown(self) -> None:
         os.remove("_tmp_db.db")
