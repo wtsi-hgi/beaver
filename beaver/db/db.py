@@ -34,8 +34,15 @@ def create_connectors(database_url: str):
     """
 
     global engine, session  # pylint: disable=global-statement, invalid-name
-    engine = create_engine(database_url, connect_args={
-                           "check_same_thread": False})
+
+    if database_url.startswith("sqlite"):
+        connect_args = {
+            "check_same_thread": False
+        }
+    else:
+        connect_args = {}
+
+    engine = create_engine(database_url, connect_args=connect_args)
     session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

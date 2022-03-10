@@ -21,12 +21,16 @@ import enum
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 
-class GitHubPackage(BaseModel):
-    """represents a package derived from github"""
-    package_id: int
+class GitHubPackageBase(BaseModel):
+    """base representation of a package derived from github"""
     github_user: str
     repository_name: str
     commit_hash: str | None
+
+
+class GitHubPackage(GitHubPackageBase):
+    """represents a package derived from github"""
+    package_id: int
 
     class Config:
         """orm config"""
@@ -47,6 +51,7 @@ class PackageBase(BaseModel):
     commonly_used: bool
     package_type: PackageType
     github_filename: str | None
+    github_package: GitHubPackageBase | None
 
 
 class Package(PackageBase):

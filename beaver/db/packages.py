@@ -24,7 +24,7 @@ from sqlalchemy.orm import relationship, Session
 from sqlalchemy.orm.relationships import RelationshipProperty
 
 from beaver.db.db import Base
-from beaver.models.packages import PackageType
+from beaver.models.packages import PackageBase, PackageType
 
 
 class Package(Base):
@@ -74,3 +74,27 @@ class PackageDependency(Base):
 def get_all_pacakges(database: Session) -> List[Package]:
     """gets all pacakges available"""
     return database.query(Package).all()  # type: ignore
+
+
+def create_new_package(database: Session, package: PackageBase) -> Package:
+    """create a new package in the database"""
+    _package = package.dict()
+    if "github_package" in _package:
+        del _package["github_package"]
+
+    db_package = Package(**_package)
+    database.add(db_package)
+    database.commit()
+    database.refresh(db_package)
+
+    if package.github_package:
+        gh_package = GitHubPackage(
+            **package.github_package.dict(),
+            package_id=db_package.package_id
+        )
+        database.add(gh_package)
+        database.commit()
+        database.refresh(gh_package)
+        database.refresh(db_package)
+
+    return db_package

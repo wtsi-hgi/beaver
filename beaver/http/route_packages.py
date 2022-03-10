@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 from beaver.db.db import get_db
 import beaver.db.packages
-from beaver.models.packages import Package
+from beaver.models.packages import Package, PackageBase
 
 router = APIRouter(prefix="/packages", tags=["packages"])
 
@@ -31,3 +31,12 @@ router = APIRouter(prefix="/packages", tags=["packages"])
 async def get_all_packages(database: Session = Depends(get_db)) -> List[beaver.db.packages.Package]:
     """returns all available packages"""
     return beaver.db.packages.get_all_pacakges(database)
+
+
+@router.post("/", response_model=Package)
+async def add_new_package(
+    package: PackageBase,
+    database: Session = Depends(get_db)
+) -> beaver.db.packages.Package:
+    """create a new package"""
+    return beaver.db.packages.create_new_package(database, package)
