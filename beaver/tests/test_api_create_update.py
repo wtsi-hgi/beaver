@@ -127,8 +127,6 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
         del gh_package["_sa_instance_state"]
         db_package["github_package"] = gh_package
         new_package["github_package"]["github_package_id"] = gh_package_id
-        print(db_package)
-        print(new_package)
         assert db_package == new_package
 
     def test_create_new_name_elements_adjectives(self):
