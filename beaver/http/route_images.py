@@ -24,16 +24,20 @@ from sqlalchemy.orm import Session
 
 from beaver.db.db import get_db
 import beaver.db.images
+from beaver.http.env import Env
 from beaver.models.images import Image
 
 
 router = APIRouter(prefix="/images", tags=["images"])
 
 
-@router.get("/{user_id}", response_model=List[Image])
+@router.get("/{user}", response_model=List[Image])
 async def get_images_for_user(
-    user_id: int,
+    user: str,
     database: Session = Depends(get_db)
 ) -> List[beaver.db.images.Image]:
     """returns images available for the specific user"""
-    return beaver.db.images.get_images_for_user(database, user_id)
+    images = beaver.db.images.get_images_for_user(database, user)
+    for group in Env.idm.get_groups_for_user(user):
+        images += beaver.db.images.get_images_for_group_name(database, group)
+    return images

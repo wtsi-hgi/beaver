@@ -18,6 +18,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from .core import IdentityManager
-from .ldap import SangerLDAPIdentityManager
-from .local import LocalJSONIdentityManager
+
+from dataclasses import dataclass
+
+from beaver.utils.idm import IdentityManager
+import beaver.utils.idm
+
+
+@dataclass
+class Env:
+    """singleton instance of general things needed
+    all around the place
+    """
+
+    _instance = None
+
+    idm: IdentityManager
+
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super(Env, cls).__new__(cls)
+        return cls._instance
+
+
+# TODO: temporary until proper configuration sorted
+Env.idm = beaver.utils.idm.SangerLDAPIdentityManager(
+    "ldap-ro.internal.sanger.ac.uk", 389)
