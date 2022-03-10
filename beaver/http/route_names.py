@@ -1,6 +1,8 @@
 """
 HGI Beaver - Software Provisioning
-Copyright (C) 2022 Michael Grace <mg38@sanger.ac.uk>
+Copyright (C) 2022 Genome Research Limited
+
+Author: Michael Grace <mg38@sanger.ac.uk>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
