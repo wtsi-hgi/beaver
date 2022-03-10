@@ -32,9 +32,9 @@ class Job(Base):
     """models a job"""
 
     __tablename__ = "jobs"
-    job_id = Column(Integer, primary_key=True)
-    image_id = Column(Integer, ForeignKey("images.image_id"))
-    status = Column(Enum(JobStatus))
+    job_id = Column(String, primary_key=True)
+    image_id = Column(Integer, ForeignKey("images.image_id"), nullable=False)
+    status = Column(Enum(JobStatus), nullable=False, default=JobStatus.Queued)
     detail = Column(String)
     starttime = Column(DateTime)
     endtime = Column(DateTime)

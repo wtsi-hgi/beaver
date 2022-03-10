@@ -25,12 +25,14 @@ from fastapi.testclient import TestClient
 from beaver.db.image_usage import ImageUsage
 from beaver.db.images import Image, ImageContents
 from beaver.db.names import ImageNameAdjective, ImageNameName
+from beaver.db.jobs import Job
 
 from beaver.db.packages import GitHubPackage, Package
 from beaver.db.groups import Group
 from beaver.db.users import User
 import beaver.db.db
 import beaver.http
+from beaver.models.jobs import JobStatus
 
 
 class TestAPIGetEndpoints(unittest.TestCase):
@@ -90,7 +92,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
         )
         database.add(_gh_package)
 
-        self.image_usage_time = datetime(2006, 1, 2, 22, 4, 5)
+        self.default_time = datetime(2006, 1, 2, 22, 4, 5)
 
         # Let's create a few images
         for i in range(1, 3):
@@ -107,7 +109,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 image_id=i,
                 user_id=i,
                 group_id=i,
-                datetime=self.image_usage_time
+                datetime=self.default_time
             )
 
             database.add(_image_usage)
@@ -131,6 +133,103 @@ class TestAPIGetEndpoints(unittest.TestCase):
             database.add(_name)
 
         database.add(_image_contents)
+
+        # Let's now sort out some jobs
+        # 7 Queued Jobs
+        # (we don't particulary care that they're all
+        # for the same image)
+        for i in range(7):
+            _job = Job(
+                job_id=f"q{i}",
+                image_id=1
+            )
+            database.add(_job)
+
+        # 4 Jobs Building Definition
+        for i in range(4):
+            _job = Job(
+                job_id=f"bd{i}",
+                image_id=1,
+                status=JobStatus.BuildingDefinition,
+                starttime=self.default_time
+            )
+
+            database.add(_job)
+
+        # 1 Job Pending Actual Build
+        for i in range(1):
+            # loop just so we can change the number
+            _job = Job(
+                job_id=f"p{i}",
+                image_id=1,
+                status=JobStatus.DefinitionMade,
+                starttime=self.default_time
+            )
+
+            database.add(_job)
+
+        # 8 Jobs Building Image
+        for i in range(8):
+            _job = Job(
+                job_id=f"bi{i}",
+                image_id=1,
+                status=JobStatus.BuildingImage,
+                starttime=self.default_time
+            )
+
+            database.add(_job)
+
+        # 5 Completed Builds in Last 24 Hours
+        for i in range(5):
+            _job = Job(
+                job_id=f"c{i}",
+                image_id=1,
+                status=JobStatus.Succeeded,
+                starttime=self.default_time,
+                endtime=datetime.now(),
+                detail=f"Completed Build {i}"
+            )
+
+            database.add(_job)
+
+        # 2 Jobs Completed in the Past
+        for i in range(2):
+            _job = Job(
+                job_id=f"c.old{i}",
+                image_id=1,
+                status=JobStatus.Succeeded,
+                starttime=self.default_time,
+                endtime=self.default_time,
+                detail=f"Completed Old Job {i}"
+            )
+
+            database.add(_job)
+
+        # 3 Failed Builds in Last 24 Hours
+        for i in range(3):
+            _job = Job(
+                job_id=f"f{i}",
+                image_id=1,
+                status=JobStatus.Failed,
+                starttime=self.default_time,
+                endtime=datetime.now(),
+                detail=f"Failed Build {i}"
+            )
+
+            database.add(_job)
+
+        # 4 Jobs Failed in the Past
+        for i in range(4):
+            _job = Job(
+                job_id=f"f.old{i}",
+                image_id=1,
+                status=JobStatus.Failed,
+                starttime=self.default_time,
+                endtime=self.default_time,
+                detail=f"Failed Old Job {i}"
+            )
+
+            database.add(_job)
 
         database.commit()
 
@@ -201,7 +300,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
 
         assert len(data) == 1
         assert data[0]["user_id"] == 1
-        assert data[0]["datetime"] == self.image_usage_time.isoformat()
+        assert data[0]["datetime"] == self.default_time.isoformat()
 
     def test_image_usage_by_group(self):
         """test collecting image usage information
@@ -221,7 +320,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
 
         assert len(data) == 1
         assert data[0]["group_id"] == 2
-        assert data[0]["datetime"] == self.image_usage_time.isoformat()
+        assert data[0]["datetime"] == self.default_time.isoformat()
 
     def test_image_usage_by_image(self):
         """test collecting image usage information
@@ -241,7 +340,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
 
         assert len(data) == 1
         assert data[0]["image_id"] == 1
-        assert data[0]["datetime"] == self.image_usage_time.isoformat()
+        assert data[0]["datetime"] == self.default_time.isoformat()
 
     def test_image_usage_by_package(self):
         """test collecting image usage information
@@ -262,11 +361,32 @@ class TestAPIGetEndpoints(unittest.TestCase):
         print(data)
         assert len(data) == 1
         assert data[0]["image_id"] == 1
-        assert data[0]["datetime"] == self.image_usage_time.isoformat()
+        assert data[0]["datetime"] == self.default_time.isoformat()
 
-    # def test_get_job_information(self):
-    #     # TODO
-    #     ...
+    def test_get_job_information(self):
+        """test getting counts of jobs in various states
+
+        Expects:
+            {
+                "jobs_queued": 7,
+                "jobs_building_definition": 4,
+                "jobs_pending_image_build": 1,
+                "jobs_building_image": 8,
+                "jobs_completed_last_24_hours": 5,
+                "jobs_failed_last_24_hours": 3
+            }
+        """
+
+        response = self.client.get("/jobs")
+        assert response.status_code == 200
+        assert response.json() == {
+            "jobs_queued": 7,
+            "jobs_building_definition": 4,
+            "jobs_pending_image_build": 1,
+            "jobs_building_image": 8,
+            "jobs_completed_last_24_hours": 5,
+            "jobs_failed_last_24_hours": 3
+        }
 
     # def test_get_job(self):
     #     # TODO
