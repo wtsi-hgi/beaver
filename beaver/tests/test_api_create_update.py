@@ -24,6 +24,7 @@ import unittest
 from fastapi.testclient import TestClient
 
 import beaver.db.db
+from beaver.db.names import ImageNameAdjective, ImageNameName
 from beaver.db.packages import GitHubPackage, Package
 import beaver.http
 from . import set_up_database
@@ -129,6 +130,57 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
         print(db_package)
         print(new_package)
         assert db_package == new_package
+
+    def test_create_new_name_elements_adjectives(self):
+        """test adding new adjectives to the possibilites of
+            image names
+
+        Expects:
+            - the response we get back from the API is what we sent
+            - the adjectives in the DB are what we've added
+        """
+        new_adjectives = {
+            "names": [],
+            "adjectives": [
+                f"new_adj_{i}" for i in range(4)
+            ]
+        }
+
+        response = self.client.post("/names/", json=new_adjectives)
+        assert response.status_code == 200
+        data = response.json()
+        assert data == new_adjectives
+
+        database = next(beaver.db.db.get_db())
+
+        db_adjectives = [x.adjective for x in database.query(
+            ImageNameAdjective).all()]
+        assert all(x in db_adjectives for x in new_adjectives["adjectives"])
+
+    def test_create_new_name_elements_names(self):
+        """test adding new names to the possibilites of
+            image names
+
+        Expects:
+            - the response we get back from the API is what we sent
+            - the names in the DB are what we've added
+        """
+        new_adjectives = {
+            "adjectives": [],
+            "names": [
+                f"new_name_{i}" for i in range(4)
+            ]
+        }
+
+        response = self.client.post("/names/", json=new_adjectives)
+        assert response.status_code == 200
+        data = response.json()
+        assert data == new_adjectives
+
+        database = next(beaver.db.db.get_db())
+
+        db_names = [x.name for x in database.query(ImageNameName).all()]
+        assert all(x in db_names for x in new_adjectives["names"])
 
     def tearDown(self) -> None:
         os.remove("_tmp_db.db")
