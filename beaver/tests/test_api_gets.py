@@ -93,6 +93,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
         database.add(_gh_package)
 
         self.default_time = datetime(2006, 1, 2, 22, 4, 5)
+        self.now = datetime.now()
 
         # Let's create a few images
         for i in range(1, 3):
@@ -156,9 +157,8 @@ class TestAPIGetEndpoints(unittest.TestCase):
 
             database.add(_job)
 
-        # 1 Job Pending Actual Build
-        for i in range(1):
-            # loop just so we can change the number
+        # 2 Jobs Pending Actual Build
+        for i in range(2):
             _job = Job(
                 job_id=f"p{i}",
                 image_id=1,
@@ -186,7 +186,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 image_id=1,
                 status=JobStatus.Succeeded,
                 starttime=self.default_time,
-                endtime=datetime.now(),
+                endtime=self.now,
                 detail=f"Completed Build {i}"
             )
 
@@ -212,7 +212,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 image_id=1,
                 status=JobStatus.Failed,
                 starttime=self.default_time,
-                endtime=datetime.now(),
+                endtime=self.now,
                 detail=f"Failed Build {i}"
             )
 
@@ -370,7 +370,7 @@ class TestAPIGetEndpoints(unittest.TestCase):
             {
                 "jobs_queued": 7,
                 "jobs_building_definition": 4,
-                "jobs_pending_image_build": 1,
+                "jobs_pending_image_build": 2,
                 "jobs_building_image": 8,
                 "jobs_completed_last_24_hours": 5,
                 "jobs_failed_last_24_hours": 3
@@ -382,15 +382,117 @@ class TestAPIGetEndpoints(unittest.TestCase):
         assert response.json() == {
             "jobs_queued": 7,
             "jobs_building_definition": 4,
-            "jobs_pending_image_build": 1,
+            "jobs_pending_image_build": 2,
             "jobs_building_image": 8,
             "jobs_completed_last_24_hours": 5,
             "jobs_failed_last_24_hours": 3
         }
 
-    # def test_get_job(self):
-    #     # TODO
-    #     ...
+    def test_get_job(self):
+        """test getting job information
+
+        Test Cases:
+            - Request Job q1
+            Expects:
+                - Job Status: Queued
+                - Image ID: 1
+                - Start Time: Not Set
+                - End Time: Not Set
+
+            - Request Job bd1
+            Expects:
+                - Job Status: BuildingDefinition
+                - Image ID: 1
+                - Start Time: 2nd Jan 2006
+                - End Time: Not Set
+
+            - Request Job p1
+            Expects:
+                - Job Status: DefinitionMade
+                - Image ID: 1
+                - Start Time: 2nd Jan 2006
+                - End Time: Not Set
+
+            - Request Job bi1
+            Expects:
+                - Job Status: BuildingImage
+                - Image ID: 1
+                - Start Time: 2nd Jan 2006
+                - End Time: Not Set
+
+            - Request Job c1
+            Expects:
+                - Job Status: Succeeded
+                - Image ID: 1
+                - Start Time: 2nd Jan 2006
+                - End Time: now
+                - Detail: Completed Build 1
+
+            - Request Job f1
+            Expects:
+                - Job Status: Failed
+                - Image ID: 1
+                - Start Time: 2nd Jan 2006
+                - End Time: now
+                - Detail: Failed Build 1
+
+        """
+
+        # Queued Job
+        response = self.client.get("/jobs/q1")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "Queued"
+        assert data["image_id"] == 1
+        assert data["starttime"] is None
+        assert data["endtime"] is None
+
+        # BuildingDefinition Job
+        response = self.client.get("/jobs/bd1")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "BuildingDefinition"
+        assert data["image_id"] == 1
+        assert data["starttime"] == self.default_time.isoformat()
+        assert data["endtime"] is None
+
+        # DefinitionMade Job
+        response = self.client.get("/jobs/p1")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "DefinitionMade"
+        assert data["image_id"] == 1
+        assert data["starttime"] == self.default_time.isoformat()
+        assert data["endtime"] is None
+
+        # BuildingImage Job
+        response = self.client.get("/jobs/bi1")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "BuildingImage"
+        assert data["image_id"] == 1
+        assert data["starttime"] == self.default_time.isoformat()
+        assert data["endtime"] is None
+
+        # Succeeded Job
+        response = self.client.get("/jobs/c1")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "Succeeded"
+        assert data["image_id"] == 1
+        assert data["starttime"] == self.default_time.isoformat()
+        assert data["endtime"] == self.now.isoformat()
+        assert data["detail"] == "Completed Build 1"
+
+        # Failed Job
+        response = self.client.get("/jobs/f1")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "Failed"
+        assert data["image_id"] == 1
+        assert data["starttime"] == self.default_time.isoformat()
+        assert data["endtime"] == self.now.isoformat()
+        assert data["detail"] == "Failed Build 1"
 
     def test_get_image_names(self):
         """test getting possible image name parts
