@@ -22,6 +22,7 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies
       run: |
+        sudo apt install libldap2-dev libsasl2-dev
         python -m pip install --upgrade pip
         pip install .
         pip install pytest-cov pylint
