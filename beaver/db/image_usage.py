@@ -77,9 +77,9 @@ def get_image_usage_by_package(database: Session, package: int) -> List[ImageUsa
 def record_image_usage(database: Session, image_usage: ImageUsageBase) -> ImageUsage:
     """record usage of an image in the database"""
 
-    db_image_usage = ImageUsage(**image_usage.dict())
-    database.add(db_image_usage)
+    db_image_usage = ImageUsage(**image_usage.dict())  # type: ignore
+    database.add(db_image_usage)  # type: ignore
     database.commit()
-    database.refresh(db_image_usage)
+    database.refresh(db_image_usage)  # type: ignore
 
     return db_image_usage

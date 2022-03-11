@@ -23,7 +23,7 @@ from __future__ import annotations
 from typing import List
 
 from sqlalchemy import Column, ForeignKey, String, Integer
-import sqlalchemy
+import sqlalchemy.exc
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.orm.relationships import RelationshipProperty
 
@@ -55,9 +55,10 @@ class ImageContents(Base):
         "packages.package_id"), nullable=False)
 
 
-def get_images_for_user(database: Session, user: int) -> List[Image]:
+def get_images_for_user(database: Session, user: str) -> List[Image]:
     """gets images available for the specific user"""
-    user_id = database.query(User).filter(User.user_name == user).one().user_id
+    user_id = database.query(User).filter(  # type: ignore
+        User.user_name == user).one().user_id  # type: ignore
     return database.query(Image).filter(  # type: ignore
         Image.user_id == user_id).all()  # type: ignore
 
@@ -65,8 +66,10 @@ def get_images_for_user(database: Session, user: int) -> List[Image]:
 def get_images_for_group_name(database: Session, group_name: str) -> List[Image]:
     """gets images available for the given group name"""
     try:
-        group_id = database.query(Group).filter(
-            Group.group_name == group_name).one().group_id
-    except sqlalchemy.exc.NoResultFound:
+        group_id = database.query(Group).filter(  # type: ignore
+            Group.group_name == group_name).one().group_id  # type: ignore
+    except sqlalchemy.exc.NoResultFound:  # type: ignore
         return []
-    return database.query(Image).filter(Image.group_id == group_id).all()
+
+    return database.query(Image).filter(  # type: ignore
+        Image.group_id == group_id).all()  # type: ignore

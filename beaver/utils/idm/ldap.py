@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import Set
 
 import ldap
+from ldap.ldapobject import LDAPObject
 
 from .core import IdentityManager
 
@@ -37,13 +38,14 @@ class SangerLDAPIdentityManager(IdentityManager):
         self.ldap_port = ldap_port
 
     @property
-    def _ldap_conn(self):
-        conn = ldap.initialize(f"ldap://{self.ldap_host}:{self.ldap_port}")
-        conn.bind("", "")
+    def _ldap_conn(self) -> LDAPObject:
+        conn: LDAPObject = ldap.initialize(  # type: ignore
+            f"ldap://{self.ldap_host}:{self.ldap_port}")
+        conn.bind("", "")  # type: ignore
         return conn
 
     def get_groups_for_user(self, user_id: str) -> Set[str]:
-        return set(x["cn"][0].decode("UTF-8") for _, x in self._ldap_conn.search_s(
+        return set(x["cn"][0].decode("UTF-8") for _, x in self._ldap_conn.search_s(  # type: ignore
             "dc=sanger,dc=ac,dc=uk",
             SCOPE_SUBTREE,
             f"(&(objectClass=groupOfNames)(member=uid={user_id},ou=people,dc=sanger,dc=ac,dc=uk))",

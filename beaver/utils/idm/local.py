@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 from pathlib import Path
-from typing import Set
+from typing import Set, Dict, List
 
 import json
 
@@ -41,7 +41,7 @@ class LocalJSONIdentityManager(IdentityManager):
         with open(self.file_path, encoding="UTF-8") as idm_file:
             _data = json.load(idm_file)
 
-        groups = set()
+        groups: Set[str] = set()
         for group_name, members in _data.items():
             if user_id in members:
                 groups.add(group_name)
@@ -56,7 +56,7 @@ class LocalJSONIdentityManager(IdentityManager):
             with open(self.file_path, encoding="UTF-8") as idm_file:
                 _data = json.load(idm_file)
         except FileNotFoundError:
-            _data = {}
+            _data: Dict[str, List[str]] = {}
 
         if group_name in _data:
             _data[group_name].append(user_id)

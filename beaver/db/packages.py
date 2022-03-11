@@ -84,19 +84,19 @@ def create_new_package(database: Session, package: PackageBase) -> Package:
     if "github_package" in _package:
         del _package["github_package"]
 
-    db_package = Package(**_package)
-    database.add(db_package)
+    db_package = Package(**_package)  # type: ignore
+    database.add(db_package)  # type: ignore
     database.commit()
-    database.refresh(db_package)
+    database.refresh(db_package)  # type: ignore
 
     if package.github_package:
-        gh_package = GitHubPackage(
+        gh_package = GitHubPackage(  # type: ignore
             **package.github_package.dict(),
             package_id=db_package.package_id
         )
-        database.add(gh_package)
+        database.add(gh_package)  # type: ignore
         database.commit()
-        database.refresh(gh_package)
-        database.refresh(db_package)
+        database.refresh(gh_package)  # type: ignore
+        database.refresh(db_package)  # type: ignore
 
     return db_package

@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import json
+from pathlib import Path
 import unittest
 
 from beaver.utils.idm import LocalJSONIdentityManager
@@ -33,7 +34,7 @@ class TestLocalIdentityManager(unittest.TestCase):
         """test adding users through the IDM, and
             then check the JSON file matches
         """
-        _idm = LocalJSONIdentityManager("_test.json")
+        _idm = LocalJSONIdentityManager(Path("_test.json"))
         _idm.add_user_to_group("userA", "groupA")
         _idm.add_user_to_group("userA", "groupB")
         _idm.add_user_to_group("userB", "groupA")
@@ -58,7 +59,7 @@ class TestLocalIdentityManager(unittest.TestCase):
         with open("_test.json", "w", encoding="UTF-8") as idm_file:
             json.dump(data, idm_file)
 
-        _idm = LocalJSONIdentityManager("_test.json")
+        _idm = LocalJSONIdentityManager(Path("_test.json"))
         self.assertEqual(_idm.get_groups_for_user(
             "user0"), {"group0", "group1"})
         self.assertEqual(_idm.get_groups_for_user("user1"), {"group0"})
@@ -68,7 +69,7 @@ class TestLocalIdentityManager(unittest.TestCase):
         and then retrieving users
         """
 
-        _idm = LocalJSONIdentityManager("_test.json")
+        _idm = LocalJSONIdentityManager(Path("_test.json"))
         _idm.add_user_to_group("userX", "groupX")
         _idm.add_user_to_group("userX", "groupY")
         _idm.add_user_to_group("userY", "groupX")
