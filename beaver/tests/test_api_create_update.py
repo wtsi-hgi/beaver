@@ -48,22 +48,22 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         database = next(beaver.db.db.get_db())
 
-        _new_user = User(user_name="testUser0")  # type: ignore
-        database.add(_new_user)  # type: ignore
+        _new_user = User(user_name="testUser0")
+        database.add(_new_user)
 
-        _new_group = Group(group_name="testGroup0")  # type: ignore
-        database.add(_new_group)  # type: ignore
+        _new_group = Group(group_name="testGroup0")
+        database.add(_new_group)
 
-        database.commit()  # type: ignore
+        database.commit()
 
-        _new_image = Image(  # type: ignore
+        _new_image = Image(
             image_name="testImage",
             user_id=1,
             group_id=1
         )
 
-        database.add(_new_image)  # type: ignore
-        database.commit()  # type: ignore
+        database.add(_new_image)
+        database.commit()
 
     def test_create_package_not_github_linked(self):
         """test createing a new package, not linked to
@@ -95,10 +95,10 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         database = next(beaver.db.db.get_db())
 
-        db_package = database.query(Package).filter(  # type: ignore
+        db_package = database.query(Package).filter(
             Package.package_id == package_id).one().__dict__
         del db_package["_sa_instance_state"]
-        _v = db_package["package_type"].value  # type: ignore
+        _v = db_package["package_type"].value
         db_package["package_type"] = _v
         assert db_package == new_package
 
@@ -141,13 +141,13 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         database = next(beaver.db.db.get_db())
 
-        db_package = database.query(Package).filter(  # type: ignore
+        db_package = database.query(Package).filter(
             Package.package_id == package_id).one().__dict__
         del db_package["_sa_instance_state"]
-        _v = db_package["package_type"].value  # type: ignore
+        _v = db_package["package_type"].value
         db_package["package_type"] = _v
 
-        gh_package = database.query(GitHubPackage).filter(  # type: ignore
+        gh_package = database.query(GitHubPackage).filter(
             GitHubPackage.package_id == gh_id).one().__dict__
         del gh_package["_sa_instance_state"]
         db_package["github_package"] = gh_package
@@ -176,7 +176,7 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         database = next(beaver.db.db.get_db())
 
-        db_adjectives = [x.adjective for x in database.query(  # type: ignore
+        db_adjectives = [x.adjective for x in database.query(
             ImageNameAdjective).all()]
         assert all(x in db_adjectives for x in new_adjectives["adjectives"])
 
@@ -202,7 +202,7 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
 
         database = next(beaver.db.db.get_db())
 
-        db_names = [x.name for x in database.query(  # type: ignore
+        db_names = [x.name for x in database.query(
             ImageNameName).all()]
         assert all(x in db_names for x in new_adjectives["names"])
 
@@ -230,7 +230,7 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
         self.assertEqual(data["group_id"], new_image_usage["group_id"])
 
         database = next(beaver.db.db.get_db())
-        db_image_usage = database.query(  # type: ignore
+        db_image_usage = database.query(
             ImageUsage).one().__dict__
         self.assertTrue(datetime.now() - timedelta(0, 10)
                         < db_image_usage["datetime"])

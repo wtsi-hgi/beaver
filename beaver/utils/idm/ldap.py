@@ -39,13 +39,13 @@ class SangerLDAPIdentityManager(IdentityManager):
 
     @property
     def _ldap_conn(self) -> LDAPObject:
-        conn: LDAPObject = ldap.initialize(  # type: ignore
+        conn: LDAPObject = ldap.initialize(
             f"ldap://{self.ldap_host}:{self.ldap_port}")
-        conn.bind("", "")  # type: ignore
+        conn.bind("", "")
         return conn
 
     def get_groups_for_user(self, user_id: str) -> Set[str]:
-        return set(x["cn"][0].decode("UTF-8") for _, x in self._ldap_conn.search_s(  # type: ignore
+        return set(x["cn"][0].decode("UTF-8") for _, x in self._ldap_conn.search_s(
             "dc=sanger,dc=ac,dc=uk",
             SCOPE_SUBTREE,
             f"(&(objectClass=groupOfNames)(member=uid={user_id},ou=people,dc=sanger,dc=ac,dc=uk))",

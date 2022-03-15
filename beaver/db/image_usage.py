@@ -51,35 +51,35 @@ class ImageUsage(Base):
 
 def get_image_usage_for_user(database: Session, user: int) -> List[ImageUsage]:
     """get image usage for the particular user"""
-    return database.query(ImageUsage).filter(ImageUsage.user_id == user).all()  # type: ignore
+    return database.query(ImageUsage).filter(ImageUsage.user_id == user).all()
 
 
 def get_image_usage_for_group(database: Session, group: int) -> List[ImageUsage]:
     """get image usage for the group"""
-    return database.query(ImageUsage).filter(ImageUsage.group_id == group).all()  # type: ignore
+    return database.query(ImageUsage).filter(ImageUsage.group_id == group).all()
 
 
 def get_image_usage_by_image(database: Session, image: int) -> List[ImageUsage]:
     """get image usage for the image"""
-    return database.query(ImageUsage).filter(ImageUsage.image_id == image).all()  # type: ignore
+    return database.query(ImageUsage).filter(ImageUsage.image_id == image).all()
 
 
 def get_image_usage_by_package(database: Session, package: int) -> List[ImageUsage]:
     """get image usage based on a particular package"""
-    images_for_package = database.query(ImageContents).filter(  # type: ignore
-        ImageContents.package_id == package  # type: ignore
+    images_for_package = database.query(ImageContents).filter(
+        ImageContents.package_id == package
     ).with_entities(ImageContents.image_id).subquery()
 
-    return database.query(ImageUsage).filter(  # type: ignore
-        ImageUsage.image_id.in_(images_for_package)).all()  # type: ignore
+    return database.query(ImageUsage).filter(
+        ImageUsage.image_id.in_(images_for_package)).all()
 
 
 def record_image_usage(database: Session, image_usage: ImageUsageBase) -> ImageUsage:
     """record usage of an image in the database"""
 
-    db_image_usage = ImageUsage(**image_usage.dict())  # type: ignore
-    database.add(db_image_usage)  # type: ignore
+    db_image_usage = ImageUsage(**image_usage.dict())
+    database.add(db_image_usage)
     database.commit()
-    database.refresh(db_image_usage)  # type: ignore
+    database.refresh(db_image_usage)
 
     return db_image_usage

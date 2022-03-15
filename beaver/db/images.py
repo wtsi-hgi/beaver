@@ -57,19 +57,19 @@ class ImageContents(Base):
 
 def get_images_for_user(database: Session, user: str) -> List[Image]:
     """gets images available for the specific user"""
-    user_id = database.query(User).filter(  # type: ignore
-        User.user_name == user).one().user_id  # type: ignore
-    return database.query(Image).filter(  # type: ignore
-        Image.user_id == user_id).all()  # type: ignore
+    user_id = database.query(User).filter(
+        User.user_name == user).one().user_id
+    return database.query(Image).filter(
+        Image.user_id == user_id).all()
 
 
 def get_images_for_group_name(database: Session, group_name: str) -> List[Image]:
     """gets images available for the given group name"""
     try:
-        group_id = database.query(Group).filter(  # type: ignore
-            Group.group_name == group_name).one().group_id  # type: ignore
-    except sqlalchemy.exc.NoResultFound:  # type: ignore
+        group_id = database.query(Group).filter(
+            Group.group_name == group_name).one().group_id
+    except sqlalchemy.exc.NoResultFound:
         return []
 
-    return database.query(Image).filter(  # type: ignore
-        Image.group_id == group_id).all()  # type: ignore
+    return database.query(Image).filter(
+        Image.group_id == group_id).all()

@@ -42,9 +42,9 @@ class ImageNameName(Base):
 def get_names(database: Session) -> ImageNameElements:
     """returns all the elements that could make up an image name"""
     return ImageNameElements(
-        adjectives=[x.adjective for x in database.query(  # type: ignore
+        adjectives=[str(x.adjective) for x in database.query(
             ImageNameAdjective).all()],
-        names=[x.name for x in database.query(  # type: ignore
+        names=[str(x.name) for x in database.query(
             ImageNameName).all()]
     )
 
@@ -52,12 +52,12 @@ def get_names(database: Session) -> ImageNameElements:
 def create_names(database: Session, item: ImageNameElements) -> ImageNameElements:
     """adds elements to the lists of possible image name elements"""
     for adj in item.adjectives:
-        db_adj_item = ImageNameAdjective(adjective=adj)  # type: ignore
-        database.add(db_adj_item)  # type: ignore
+        db_adj_item = ImageNameAdjective(adjective=adj)
+        database.add(db_adj_item)
 
     for name in item.names:
-        db_name_item = ImageNameName(name=name)  # type: ignore
-        database.add(db_name_item)  # type: ignore
+        db_name_item = ImageNameName(name=name)
+        database.add(db_name_item)
 
     database.commit()
     return item

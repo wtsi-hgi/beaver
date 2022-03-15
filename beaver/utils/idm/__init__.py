@@ -18,6 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from .core import IdentityManager  # type: ignore
-from .ldap import SangerLDAPIdentityManager  # type: ignore
-from .local import LocalJSONIdentityManager  # type: ignore
+from .core import IdentityManager
+from .ldap import SangerLDAPIdentityManager
+from .local import LocalJSONIdentityManager

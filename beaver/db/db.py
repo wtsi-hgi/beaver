@@ -26,7 +26,7 @@ from sqlalchemy.orm import sessionmaker
 
 from . import MetaBase
 
-engine = ...  # pylint: disable=invalid-name
+engine = None  # pylint: disable=invalid-name
 session = lambda: sessionmaker()  # pylint: disable=unnecessary-lambda
 
 
@@ -53,7 +53,7 @@ Base: Type[MetaBase] = declarative_base()
 
 def create_db() -> None:
     """create the databse tables if needed"""
-    Base.metadata.create_all(bind=engine)  # type: ignore
+    Base.metadata.create_all(bind=engine)
 
 
 def get_db() -> Generator[sessionmaker, None, None]:
@@ -62,4 +62,4 @@ def get_db() -> Generator[sessionmaker, None, None]:
     try:
         yield database
     finally:
-        database.close()  # type: ignore
+        database.close()

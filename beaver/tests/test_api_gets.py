@@ -51,131 +51,131 @@ class TestAPIGetEndpoints(unittest.TestCase):
 
         # Make some useres and groups
         for i in range(3):
-            _user = User(user_name=f"testUser{i}")  # type: ignore
-            database.add(_user)  # type: ignore
+            _user = User(user_name=f"testUser{i}")
+            database.add(_user)
 
-            _group = Group(group_name=f"testGroup{i}")  # type: ignore
-            database.add(_group)  # type: ignore
+            _group = Group(group_name=f"testGroup{i}")
+            database.add(_group)
 
         # Make Some Packages
         # First, a std package, not from Git
-        _package_a = Package(  # type: ignore
+        _package_a = Package(
             package_name="testPackage1"
         )
-        database.add(_package_a)  # type: ignore
+        database.add(_package_a)
 
         # Now a package with a Git Filename
-        _package_b = Package(  # type: ignore
+        _package_b = Package(
             package_name="testPackage2",
             github_filename="test.filename"
         )
-        database.add(_package_b)  # type: ignore
+        database.add(_package_b)
 
         # Now something linked to a GitHub repo
-        _package_c = Package(  # type: ignore
+        _package_c = Package(
             package_name="testPackage3"
         )
-        database.add(_package_c)  # type: ignore
-        database.commit()  # type: ignore
-        database.refresh(_package_c)  # type: ignore
+        database.add(_package_c)
+        database.commit()
+        database.refresh(_package_c)
 
-        _gh_package = GitHubPackage(  # type: ignore
+        _gh_package = GitHubPackage(
             package_id=_package_c.package_id,
             github_user="testGHUser",
             repository_name="testRepoName"
         )
-        database.add(_gh_package)  # type: ignore
+        database.add(_gh_package)
 
         self.default_time = datetime(2006, 1, 2, 22, 4, 5)
         self.now = datetime.now()
 
         # Let's create a few images
         for i in range(1, 3):
-            _image = Image(  # type: ignore
+            _image = Image(
                 image_name=f"testImage{i}",
                 user_id=i,
                 group_id=i
             )
-            database.add(_image)  # type: ignore
-            database.commit()  # type: ignore
-            database.refresh(_image)  # type: ignore
+            database.add(_image)
+            database.commit()
+            database.refresh(_image)
 
-            _image_usage = ImageUsage(  # type: ignore
+            _image_usage = ImageUsage(
                 image_id=i,
                 user_id=i,
                 group_id=i,
                 datetime=self.default_time
             )
 
-            database.add(_image_usage)  # type: ignore
+            database.add(_image_usage)
 
         # We'll also add some contents to images
-        _image_contents = ImageContents(  # type: ignore
+        _image_contents = ImageContents(
             image_id=1,
             package_id=1
         )
 
         # Add a few possible image name sections
         for i in range(5):
-            _adjective = ImageNameAdjective(  # type: ignore
+            _adjective = ImageNameAdjective(
                 adjective=f"adj{i}"
             )
-            database.add(_adjective)  # type: ignore
+            database.add(_adjective)
 
-            _name = ImageNameName(  # type: ignore
+            _name = ImageNameName(
                 name=f"name{i}"
             )
-            database.add(_name)  # type: ignore
+            database.add(_name)
 
-        database.add(_image_contents)  # type: ignore
+        database.add(_image_contents)
 
         # Let's now sort out some jobs
         # 7 Queued Jobs
         # (we don't particulary care that they're all
         # for the same image)
         for i in range(7):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"q{i}",
                 image_id=1
             )
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 4 Jobs Building Definition
         for i in range(4):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"bd{i}",
                 image_id=1,
                 status=JobStatus.BuildingDefinition,
                 starttime=self.default_time
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 2 Jobs Pending Actual Build
         for i in range(2):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"p{i}",
                 image_id=1,
                 status=JobStatus.DefinitionMade,
                 starttime=self.default_time
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 8 Jobs Building Image
         for i in range(8):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"bi{i}",
                 image_id=1,
                 status=JobStatus.BuildingImage,
                 starttime=self.default_time
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 5 Completed Builds in Last 24 Hours
         for i in range(5):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"c{i}",
                 image_id=1,
                 status=JobStatus.Succeeded,
@@ -184,11 +184,11 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 detail=f"Completed Build {i}"
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 2 Jobs Completed in the Past
         for i in range(2):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"c.old{i}",
                 image_id=1,
                 status=JobStatus.Succeeded,
@@ -197,11 +197,11 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 detail=f"Completed Old Job {i}"
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 3 Failed Builds in Last 24 Hours
         for i in range(3):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"f{i}",
                 image_id=1,
                 status=JobStatus.Failed,
@@ -210,11 +210,11 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 detail=f"Failed Build {i}"
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
         # 4 Jobs Failed in the Past
         for i in range(4):
-            _job = Job(  # type: ignore
+            _job = Job(
                 job_id=f"f.old{i}",
                 image_id=1,
                 status=JobStatus.Failed,
@@ -223,9 +223,9 @@ class TestAPIGetEndpoints(unittest.TestCase):
                 detail=f"Failed Old Job {i}"
             )
 
-            database.add(_job)  # type: ignore
+            database.add(_job)
 
-        database.commit()  # type: ignore
+        database.commit()
 
     def test_get_root(self):
         """test root endpoint
