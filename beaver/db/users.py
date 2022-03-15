@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from sqlalchemy import Column, String, Integer
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import Session
 
 from beaver.db.db import Base
 
@@ -28,3 +30,29 @@ class User(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String)
+
+    @staticmethod
+    def get_or_make_user_id_for_user_name(username: str, database: Session) -> int:
+        """get user id for the username given
+            if they don't exist in the database - make them
+
+        Args:
+            - username: str - the username to search for/add if needed
+            - database: Session - the database session
+
+        Returns: int - the found or newly created user ID
+
+        """
+
+        user_id: int
+        try:
+            user_id = int(database.query(User).filter(
+                User.user_name == username).one().user_id)
+        except NoResultFound:
+            new_user = User(user_name=username)
+            database.add(new_user)
+            database.commit()
+            database.refresh(new_user)
+            user_id = int(new_user.user_id)
+
+        return user_id

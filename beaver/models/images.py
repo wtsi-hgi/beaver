@@ -40,3 +40,10 @@ class Image(ImageBase):
     class Config:
         """orm config"""
         orm_mode = True
+
+
+class ImageCreate(BaseModel):
+    """creating a group"""
+    image_name: str | None
+    user_name: str
+    group_name: str

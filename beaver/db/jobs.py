@@ -20,14 +20,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 from datetime import datetime, timedelta
+import uuid
 
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship, Session
 from sqlalchemy.orm.relationships import RelationshipProperty
 
 from beaver.db.db import Base
-from beaver.db.images import Image
-from beaver.models.jobs import JobStatus
+from beaver.db.groups import Group
+from beaver.db.images import Image, ImageContents
+from beaver.db.users import User
+import beaver.db.names
+from beaver.models.jobs import BuildRequest, JobStatus
 
 
 class Job(Base):
@@ -85,3 +89,72 @@ def get_job(database: Session, job_id: str) -> Job:
 
     """
     return database.query(Job).filter(Job.job_id == job_id).one()
+
+
+def submit_job(database: Session, build: BuildRequest) -> Job:
+    """create a new job and associated image and packages"""
+
+    _request = build.dict()
+
+    # First we're going to make the Image object
+    # This requires turning the user and group names
+    # provided into their respective IDs
+    # We also need to generate an image name if it isn't
+    # provided
+
+    _user = _request["image"]["user_name"]
+    _group = _request["image"]["group_name"]
+
+    user_id: int = User.get_or_make_user_id_for_user_name(_user, database)
+    group_id: int = Group.get_or_make_group_id_for_group_name(_group, database)
+
+    image_name: str = beaver.db.names.generate_random_image_name(
+        database, _user, _group) if not _request["image"].get("image_name") \
+        else _request["image"]["image_name"]
+
+    # IMPORTANT TODO: check the image name doesn't already exist
+    # If it was auto generated, it won't, so if it does,
+    # then we know we can just tell the user it already exists
+    # and they need a new one
+
+    # We can now add it to the DB
+    new_image = Image(
+        image_name=image_name,
+        user_id=user_id,
+        group_id=group_id
+    )
+
+    database.add(new_image)
+    database.commit()
+    database.refresh(new_image)
+    image_id: int = int(new_image.image_id)
+
+    # TODO: add new packages
+
+    # Now we've got all our packages, we can add all the packages
+    for package_id in _request["packages"]:
+        _new_contents = ImageContents(
+            image_id=image_id,
+            package_id=package_id
+        )
+        database.add(_new_contents)
+    database.commit()
+
+    # Now we can actually create the job
+    # Let's give it an ID
+    _job_uuid: str = str(uuid.uuid4())
+    while True:
+        if database.query(Job).filter(Job.job_id == _job_uuid).count() == 0:
+            break
+        _job_uuid = str(uuid.uuid4())
+
+    job: Job = Job(
+        job_id=_job_uuid,
+        image_id=image_id
+    )
+
+    database.add(job)
+    database.commit()
+    database.refresh(job)
+
+    return job

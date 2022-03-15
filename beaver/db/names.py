@@ -18,9 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import random
+
 from sqlalchemy import Column, String
 from sqlalchemy.orm import Session
 
+from beaver.db.images import Image
 from beaver.db.db import Base
 from beaver.models.names import ImageNameElements
 
@@ -61,3 +64,35 @@ def create_names(database: Session, item: ImageNameElements) -> ImageNameElement
 
     database.commit()
     return item
+
+
+def generate_random_image_name(database: Session, user: str, group: str) -> str:
+    """generate a name for an image
+
+    this will use the adjectives and names in the DB, along with the username
+    and group name to produce one
+
+    Args:
+        - database: Session - the database session to use
+        - user: str - the username
+        - group: str - the group name
+
+    Returns: str - the newly created image name
+
+    """
+
+    _elements = get_names(database)
+    _adj = random.choice(_elements.adjectives)
+    _name = random.choice(_elements.names)
+
+    # we need to make sure this isn't already in the DB
+    # yes, this can go into an infinite loop if every
+    # possibility is already used
+    candidate_accepted: bool = False
+    candidate: str = ""
+    while not candidate_accepted:
+        candidate = f"{user}-{group}-{_adj}-{_name}"
+        if database.query(Image).filter(Image.image_name == candidate).count() == 0:
+            candidate_accepted = True
+
+    return candidate

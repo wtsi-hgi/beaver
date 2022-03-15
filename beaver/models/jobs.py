@@ -20,10 +20,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from datetime import datetime
 import enum
+from typing import List
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
-from beaver.models.images import Image
+from beaver.models.images import Image, ImageCreate
 
 
 class JobInfo(BaseModel):
@@ -65,3 +66,10 @@ class Job(JobBase):
     class Config:
         """orm config"""
         orm_mode = True
+
+
+class BuildRequest(BaseModel):
+    """represents a request to create a build job"""
+    image: ImageCreate
+    packages: List[int]
+    new_packages: List[str]
