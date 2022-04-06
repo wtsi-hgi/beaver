@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 from datetime import datetime, timedelta
+from typing import List
 import uuid
 
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String, DateTime
@@ -29,9 +30,11 @@ from sqlalchemy.orm.relationships import RelationshipProperty
 from beaver.db.db import Base
 from beaver.db.groups import Group
 from beaver.db.images import Image, ImageContents
+from beaver.db.packages import Package, create_new_package
 from beaver.db.users import User
 import beaver.db.names
 from beaver.models.jobs import BuildRequest, JobStatus
+from beaver.models.packages import PackageBase, PackageType
 
 
 class Job(Base):
@@ -108,14 +111,14 @@ def submit_job(database: Session, build: BuildRequest) -> Job:
     user_id: int = User.get_or_make_user_id_for_user_name(_user, database)
     group_id: int = Group.get_or_make_group_id_for_group_name(_group, database)
 
-    image_name: str = beaver.db.names.generate_random_image_name(
-        database, _user, _group) if not _request["image"].get("image_name") \
-        else _request["image"]["image_name"]
+    def _image_name() -> str:
+        _name = f"{_user}-{_group}-{_request['image']['image_name']}"
+        if beaver.db.names.check_image_name(database, _name):
+            return _name
+        raise ValueError(f"image name {_name} already exists")
 
-    # IMPORTANT TODO: check the image name doesn't already exist
-    # If it was auto generated, it won't, so if it does,
-    # then we know we can just tell the user it already exists
-    # and they need a new one
+    image_name: str = beaver.db.names.generate_random_image_name(
+        database, _user, _group) if not _request["image"].get("image_name") else _image_name()
 
     # We can now add it to the DB
     new_image = Image(
@@ -129,10 +132,28 @@ def submit_job(database: Session, build: BuildRequest) -> Job:
     database.refresh(new_image)
     image_id: int = int(new_image.image_id)
 
-    # TODO: add new packages
+    # Add New Packages
+    # Currently, this is just nix stuff
+    # Now, why did I make that decision three weeks ago?
+    # I'm not sure.
+    # Past Michael bad.
+
+    package_ids: List[int] = build.packages
+
+    for _new_package in build.new_packages:
+        _new_package_obj: Package = create_new_package(database, PackageBase(
+            package_name=_new_package,
+            commonly_used=False,
+            package_type=PackageType.std,
+            package_version=None,
+            github_filename=None,
+            github_package=None
+        ))
+
+        package_ids.append(int(_new_package_obj.package_id))
 
     # Now we've got all our packages, we can add all the packages
-    for package_id in _request["packages"]:
+    for package_id in package_ids:
         _new_contents = ImageContents(
             image_id=image_id,
             package_id=package_id

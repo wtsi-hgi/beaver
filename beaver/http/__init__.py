@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
@@ -73,7 +73,10 @@ async def submit_build_request(
 
     """
 
-    return beaver.db.jobs.submit_job(database, build)
+    try:
+        return beaver.db.jobs.submit_job(database, build)
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=err.args) from err
 
 app.include_router(names_router)
 app.include_router(images_router)

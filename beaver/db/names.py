@@ -66,6 +66,21 @@ def create_names(database: Session, item: ImageNameElements) -> ImageNameElement
     return item
 
 
+def check_image_name(database: Session, name: str) -> bool:
+    """checks if a given image name is already in the database being
+    used by a different image
+
+    Args:
+        - database: Session - the database session to use
+        - name: str - the iamge name to check
+
+    Returns: bool - True if the image isn't in use
+
+    """
+
+    return database.query(Image).filter(Image.image_name == name).count() == 0
+
+
 def generate_random_image_name(database: Session, user: str, group: str) -> str:
     """generate a name for an image
 
@@ -88,11 +103,9 @@ def generate_random_image_name(database: Session, user: str, group: str) -> str:
     # we need to make sure this isn't already in the DB
     # yes, this can go into an infinite loop if every
     # possibility is already used
-    candidate_accepted: bool = False
-    candidate: str = ""
-    while not candidate_accepted:
-        candidate = f"{user}-{group}-{_adj}-{_name}"
-        if database.query(Image).filter(Image.image_name == candidate).count() == 0:
-            candidate_accepted = True
 
-    return candidate
+    # TODO: can we not have infinite loop?
+    while True:
+        candidate: str = f"{user}-{group}-{_adj}-{_name}"
+        if check_image_name(database, candidate):
+            return candidate
