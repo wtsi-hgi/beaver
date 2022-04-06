@@ -33,9 +33,6 @@ from beaver.db.db import get_db
 import beaver.db.jobs
 from beaver.models.jobs import BuildRequest, Job
 
-from .env import load_config_from_file
-
-load_config_from_file("beaver_config.yml")
 
 beaver.db.db.create_connectors(
     "mysql+mysqlconnector://beaver:beaverPass@localhost/beaver")

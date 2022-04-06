@@ -25,6 +25,7 @@ from typing import Callable
 import uvicorn
 
 import beaver.version
+import beaver.utils.env
 
 _KIT_USAGE: str = "kit -v | -h | [-g GROUP] image-name [command …] "
 
@@ -113,5 +114,7 @@ def beaver_main() -> None:
         "web": beaver_web_main,
         "build": beaver_build_main
     }
+
+    beaver.utils.env.load_config_from_file("beaver_config.yml")
 
     modules_to_funcs[args.module](args.debug)

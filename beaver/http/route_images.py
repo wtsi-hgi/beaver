@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 
 from beaver.db.db import get_db
 import beaver.db.images
-from beaver.http.env import Env
+from beaver.utils.env import Env
 from beaver.models.images import Image
 
 
