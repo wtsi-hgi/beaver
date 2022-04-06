@@ -27,6 +27,9 @@ class IdentityManager(abc.ABC):
         which will manage users and their group memberships
     """
 
+    def __init__(self, **_) -> None:
+        pass
+
     @abc.abstractmethod
     def get_groups_for_user(self, user_id: str) -> Set[str]:
         """get groups user `user_id` is a part of"""

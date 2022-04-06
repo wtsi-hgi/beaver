@@ -18,29 +18,34 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from types import SimpleNamespace
+from typing import Dict, Type
 
-from dataclasses import dataclass
+import yaml
 
 from beaver.utils.idm import IdentityManager
 import beaver.utils.idm
 
 
-@dataclass
-class Env:
-    """singleton instance of general things needed
+class Env(SimpleNamespace):
+    """general things needed
     all around the place
     """
 
-    _instance = None
-
     idm: IdentityManager
 
-    def __new__(cls):
-        if not cls._instance:
-            cls._instance = super(Env, cls).__new__(cls)
-        return cls._instance
+
+str_to_idm: Dict[str, Type[IdentityManager]] = {
+    "SangerLDAPIdentityManager": beaver.utils.idm.SangerLDAPIdentityManager,
+    "LocalJSONIdentityManager": beaver.utils.idm.LocalJSONIdentityManager
+}
 
 
-# TODO: temporary until proper configuration sorted
-Env.idm = beaver.utils.idm.SangerLDAPIdentityManager(
-    "ldap-ro.internal.sanger.ac.uk", 389)
+def load_config_from_file(config_filepath: str):
+    """load the information from a YAML config to the Env namespace"""
+
+    with open(config_filepath, encoding="utf-8") as config_file:
+        config = yaml.full_load(config_file)
+
+    Env.idm = str_to_idm[config["idm"]["name"]](
+        **{k: v for k, v in config["idm"].items() if k != "name"})

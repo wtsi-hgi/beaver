@@ -1,0 +1,12 @@
+---
+idm:
+  # Sanger LDAP
+  name: SangerLDAPIdentityManager
+  ldap_host: ldap-ro.internal.sanger.ac.uk
+  ldap_port: 389
+
+  # Local IDM
+  # name: LocalJSONIdentityManager
+  # file_path: idm.json
+  # temp: true
+  
