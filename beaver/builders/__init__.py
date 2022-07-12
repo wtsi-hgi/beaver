@@ -31,7 +31,8 @@ for obj in _definition.to_repo():
 # THEN IN A SECOND PROCESS
 # Then we can pull it from the repo
 # (this'll use i guess the name of the image from the job)
-_definition: Definition = _def_builder.definition_type.from_repo(_repo.get("image_name"))
+_definition: Definition = _def_builder.definition_type.from_repo(
+    _repo.get("image_name"))
 _img = _img_builder.build(_definition)
 
 # Note - this would be a different repo

@@ -16,8 +16,9 @@ class TmpDefinition(Definition):
     def from_repo(_: RepositorableObject) -> TmpDefinition:
         return TmpDefinition()
 
+
 class TempBuilder(DefinitionBuilder):
     definition_type = TmpDefinition
-    
+
     def build(self, _: Set[Package]) -> TmpDefinition:
         return TmpDefinition()

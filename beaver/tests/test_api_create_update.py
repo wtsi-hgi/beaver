@@ -72,6 +72,12 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
             )
             database.add(_new_package)
 
+        _new_adj = ImageNameAdjective(adjective="testAdj0")
+        _new_name = ImageNameName(name="testName0")
+
+        database.add(_new_adj)
+        database.add(_new_name)
+
         database.commit()
 
     def test_create_package_not_github_linked(self):
@@ -299,10 +305,85 @@ class TestAPICreateUpdateEndpoints(unittest.TestCase):
             ImageContents).filter(ImageContents.image_id == new_job.image_id).all()))
 
     def test_create_new_job_image_name_already_exists(self):
-        ...  # TODO
+        """test creating a new job with a custom image name
+        where the image name already exists"""
+
+        # First, we'll need the package IDs of what already exists
+        database = next(beaver.db.db.get_db())
+        _package_ids = [int(x.package_id)
+                        for x in database.query(Package).all()]
+
+        # Now we can make a request to make an image
+        request = {
+            "image": {
+                "image_name": "testImageName",
+                "user_name": "testUser0",
+                "group_name": "testGroup0"
+            },
+            "packages": _package_ids,
+            "new_packages": []
+        }
+
+        self.client.post("/build", json=request)
+
+        # Now an image exists with that name, we can
+        # make the same request again, which shouldn't
+        # be happy
+        response = self.client.post("/build", json=request)
+        self.assertEqual(response.status_code, 400)
+
+        data = response.json()
+
+        self.assertTrue(any("already exists" in x for x in data["detail"]))
 
     def test_create_new_job_image_name_not_provided(self):
-        ...  # TODO
+        """test creating a new job to build an image
+        but without providing an image name, so it should
+        generate one"""
+
+        # First, we'll need the package IDs of what already exists
+        database = next(beaver.db.db.get_db())
+        _package_ids = [int(x.package_id)
+                        for x in database.query(Package).all()]
+
+        # Now we can make a request
+        request = {
+            "image": {
+                "user_name": "testUser0",
+                "group_name": "testGroup0"
+            },
+            "packages": _package_ids,
+            "new_packages": []
+        }
+
+        response = self.client.post("/build", json=request)
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        # raise Exception(data)
+
+        self.assertEqual(data["status"], "Queued")
+        self.assertEqual(data["image"]["image_name"],
+                         "testUser0-testGroup0-testAdj0-testName0")
+        self.assertEqual(data["image"]["user"]["user_name"], "testUser0")
+        self.assertEqual(data["image"]["group"]["group_name"], "testGroup0")
+
+        new_job = database.query(Job).filter(
+            Job.job_id == data["job_id"]).one()
+        self.assertEqual(new_job.status, JobStatus.Queued)
+
+        new_image = database.query(Image).filter(
+            Image.image_id == new_job.image_id).one()
+        self.assertEqual(new_image.image_name,
+                         "testUser0-testGroup0-testAdj0-testName0")
+        self.assertEqual(database.query(User).filter(
+            User.user_id == new_image.user_id).one().user_name, "testUser0")
+        self.assertEqual(database.query(Group).filter(
+            Group.group_id == new_image.group_id).one().group_name, "testGroup0")
+
+        # Let's check the DB has everything we want in the image
+        self.assertEqual(set(_package_ids), set(x.package_id for x in database.query(
+            ImageContents).filter(ImageContents.image_id == new_job.image_id).all()))
 
     def test_create_new_job_user_not_exists(self):
         ...  # TODO

@@ -10,5 +10,5 @@ class DefinitionBuilder(abc.ABC):
     definition_type: Type[Definition]
 
     @abc.abstractmethod
-    def build(self, _: Set[Package]) ->  Definition:
+    def build(self, _: Set[Package]) -> Definition:
         ...

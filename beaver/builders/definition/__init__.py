@@ -7,7 +7,7 @@ from beaver.utils.repository import RepositorableObject
 
 
 class Definition(abc.ABC):
-    
+
     @abc.abstractmethod
     def to_repo(self) -> Set[RepositorableObject]:
         ...
